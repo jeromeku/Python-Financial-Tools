@@ -1,4 +1,4 @@
-function processed_asset_profile = capm_data_preprocessing(asset_profile,treasury)
+function processed_asset_profile = capm_model_preprocessing(asset_profile,treasury)
 index = ismember(asset_profile.date(:),treasury.date(:));
 field_names = fieldnames(asset_profile);
 

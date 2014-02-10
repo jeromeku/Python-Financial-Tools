@@ -1,8 +1,6 @@
 function portfolio_allocation_model(portfolio)
 
-
 asset_characteristics = portfolio_allocation_characteristics(portfolio);
-
 
 asset_characteristics.mean = [0.10713801 0.07000767 0.07788801];
 asset_characteristics.covariance = [1.8821636 0.8007660 0.5270394;
@@ -17,8 +15,6 @@ D = 2 * asset_characteristics.covariance;
 expected_returns = .05:.001:.14;
 n_average_returns = length(expected_returns);
 standard_deviations = NaN(size(expected_returns));
-
-Aeq = [ones(1,n);asset_characteristics.mean];
 weights = NaN(n_average_returns,n);
 
 portfolio_optimization = [];
@@ -26,7 +22,7 @@ portfolio_optimization.H = D;
 portfolio_optimization.f = zeros(1,n);
 portfolio_optimization.Aineq = [];
 portfolio_optimization.bineq = [];
-portfolio_optimization.Aeq = Aeq;
+portfolio_optimization.Aeq = [ones(1,n);asset_characteristics.mean];
 portfolio_optimization.lb = zeros(n,1);
 portfolio_optimization.ub = ones(n,1);
 portfolio_optimization.solver = 'quadprog';
@@ -42,6 +38,5 @@ for i = 1:n_average_returns
     end
 end
 
-% plot(standard_deviations,expected_returns);
 
 

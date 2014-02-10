@@ -1,6 +1,0 @@
-function portfolio_asset_allocation(portfolio,options)
-
-
-asset_characteristics = portfolio_asset_characteristics(portfolio);
-n = length(portfolio.assets);
-
