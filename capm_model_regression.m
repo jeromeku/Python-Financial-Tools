@@ -24,8 +24,12 @@ critical_value = norminv(.975);
 
 capm_results.alpha.value = theta(1);
 capm_results.alpha.confidence_interval = theta(1) + [-standard_errors(1,1) * critical_value,standard_errors(1,1) * critical_value];
+capm_results.alpha.z_value = theta(1) / standard_errors(1,1);
+capm_results.alpha.p_value = 2 * (1 - normcdf(abs(capm_results.alpha.z_value)));
 
 capm_results.beta.value = theta(2);
 capm_results.beta.confidence_interval = theta(2) + [-standard_errors(2,2) * critical_value,standard_errors(2,2) * critical_value];
+capm_results.beta.z_value = theta(2) / standard_errors(2,2);
+capm_results.beta.p_value = 2 * (1 - normcdf(abs(capm_results.beta.z_value)));
 
-% keyboard;
+keyboard;
