@@ -43,8 +43,16 @@ classdef stock
     methods
         function self = stock(ticker,start_date,end_date)
             self.ticker = ticker;
-            self.dates.begin = start_date;
-            self.dates.end = end_date;
+            
+            if ~exist('start_date','var') || ~exist('end_date','var')
+                self.dates.begin = datestr(datenum(date) - 100,24);
+                self.dates.end = datestr(datenum(date),24);
+            else
+                self.dates.begin = start_date;
+                self.dates.end = end_date;
+            end
+            
+            
             self.profile = yahoo_download_daily(self);
             self.statistics = calculate_stock_statistics(self);
             
@@ -62,5 +70,35 @@ classdef stock
             fprintf('Expected return: %.4f\n',self.statistics.expected_return);
             fprintf('================================================================================\n');
         end
+        
+        function display_price(self,type)
+            
+            if ~exist('type','var')
+                type = 'Close';
+            end
+            
+            
+            plot(datenum(self.profile.date),self.profile.(genvarname(lower(type))),'k-x');
+            datetick('x','dd/mm/yyyy');
+            
+            xlabel('Daily Time Series');
+            ylabel('Daily Prices');
+            title(sprintf('%s %s Prices',self.ticker,type));
+            
+            set(gca, ...
+                'Box'         , 'off'     ,     ...
+                'TickDir'     , 'out'     ,     ...
+                'TickLength'  , [.02 .02] ,     ...
+                'XMinorTick'  , 'on'      ,     ...
+                'YMinorTick'  , 'on'      ,     ...
+                'YGrid'       , 'on'      ,     ...
+                'XColor'      , [.3 .3 .3],     ...
+                'YColor'      , [.3 .3 .3],     ...
+                'FontName'    , 'Helvetica',    ...
+                'FontSize'    , 12,             ...
+                'LineWidth'   , 1         );
+            
+        end
+        
     end
 end

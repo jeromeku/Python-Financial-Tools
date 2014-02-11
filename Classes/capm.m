@@ -5,8 +5,8 @@ classdef capm
         critical_value;
         
         asset;
-        market;
-        risk_free;
+        asset_market;
+        asset_free;
     end
     
     properties (Access = private)
@@ -15,8 +15,32 @@ classdef capm
         standard_errors;
     end
     
+    methods (Access = private)
+        
+    end
     
-    
-    
-    
+    methods
+        function self = capm(risk_free,market)
+            
+            if ischar(risk_free) && ischar(market)
+               
+                self.asset_free = stock(risk_free);
+                self.asset_market = stock(market);
+
+            else
+                
+                self.asset_free = risk_free;
+                self.asset_market = market;
+                
+            end
+            
+        end
+        
+        function display(self)
+            fprintf('================================================================================\n');
+            
+            fprintf('================================================================================\n');
+        end
+    end
+
 end
