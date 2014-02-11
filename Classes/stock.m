@@ -1,13 +1,9 @@
 classdef stock
-    
-    
     properties
         ticker;
         dates;
         profile;
-        
         statistics;
-        
     end
     
     methods (Access = private)
@@ -18,15 +14,12 @@ classdef stock
             yahoo_finance_url = 'http://ichart.finance.yahoo.com/table.csv?s=';
             [start_year,start_month,start_day] = datevec(start_date);
             [end_year,end_month,end_day] = datevec(end_date);
-            yahoo_query_url = ['&a=' num2str(start_month-1, '%02u') ...
-                '&b=' num2str(start_day) ...
-                '&c=' num2str(start_year) ...
-                '&d=' num2str(end_month-1, '%02u') ...
-                '&e=' num2str(end_day) ...
+            yahoo_query_url = ['&a=' num2str(start_month-1, '%02u')         ...
+                '&b=' num2str(start_day) '&c=' num2str(start_year)          ...
+                '&d=' num2str(end_month-1, '%02u') '&e=' num2str(end_day)   ...
                 '&f=' num2str(end_year) '&g=d&ignore=.csv'];
             stock_information = urlread([yahoo_finance_url self.ticker yahoo_query_url]);
             c = textscan(stock_information,'%s %f %f %f %f %f %f','HeaderLines',1,'Delimiter',',');
-            
             stock_fields = {'date', 'open', 'high', 'low', 'close', 'volume', 'adj_close'};
             stock_profile = [];
             for i = 1:length(stock_fields)
@@ -36,18 +29,18 @@ classdef stock
         
         function statistics = calculate_stock_statistics(self)
             statistics.returns = calculate_stock_returns(self);
-            % statistics.expected_return
+            statistics.expected_return = mean(statistics.returns);
             
         end
         
         function returns = calculate_stock_returns(self)
             returns = self.profile.close(2:end) ./ self.profile.close(1:end-1) - 1;
+            
         end
         
     end
     
     methods
-        
         function self = stock(ticker,start_date,end_date)
             self.ticker = ticker;
             self.dates.begin = start_date;
@@ -58,20 +51,16 @@ classdef stock
         end
         
         function display(self)
-            
-           
-            
             fprintf('================================================================================\n');
             fprintf('Ticker: %s\n',self.ticker);
             fprintf('In time series: from %s to %s\n\n',self.dates.begin,self.dates.end);
             fprintf('Most current performance:\n');
             fprintf('Date\t\tOpen\tHigh\tLow\tClose\tVolume\t\tAdjusted Close\n');
-            fprintf('%s\t%.2f\t%.2f\t%.2f\t%.2f\t%d\t%.2f\n',self.profile.date{end},self.profile.open(end),...
+            fprintf('%s\t%.2f\t%.2f\t%.2f\t%.2f\t%7e\t%.2f\n\n',self.profile.date{end},self.profile.open(end),...
                 self.profile.high(end),self.profile.low(end),self.profile.close(end),...
                 self.profile.volume(end),self.profile.adj_close(end))
+            fprintf('Expected return: %.4f\n',self.statistics.expected_return);
             fprintf('================================================================================\n');
         end
     end
-    
-    
 end
