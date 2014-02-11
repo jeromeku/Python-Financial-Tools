@@ -1,4 +1,7 @@
 function data = yahoo_download_daily(tickers,startDate,endDate,dateFormat)
+% Example usage:
+% data = yahoo_download_daily({'MSFT', 'ML.PA'},'01/01/2010', '01/01/2013', 'dd/mm/yyyy')
+
 if ischar(tickers)
     tickers = {tickers};
 end
