@@ -1,0 +1,12 @@
+class Stock:
+    def __init__(self,ticker,date_range):
+        self.ticker = ticker
+        self.date_range = date_range
+        self.
+    
+    
+
+
+s = Stock("MSFT",1)
+print s.ticker
+
