@@ -35,6 +35,7 @@ classdef stock
         function statistics = calculate_stock_statistics(self)
             statistics.returns = calculate_stock_returns(self);
             statistics.expected_return = mean(statistics.returns);
+            statistics.gross_return = prod(statistics.returns);
             
         end
         

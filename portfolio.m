@@ -17,9 +17,7 @@ classdef portfolio
             
             D = 2 * self.statistics.covariance;
             n = self.n_assets;
-            
-            self.statistics.mean = [0.10713801 0.07000767 0.07788801];
-            
+
             expected_returns = .05:.001:.14;
             n_average_returns = length(expected_returns);
             standard_deviations = NaN(size(expected_returns));
@@ -64,7 +62,7 @@ classdef portfolio
                 
             end
             asset_returns = horzcat(asset_return_cell{:});
-            
+ 
             statistics.mean = mean(asset_returns);
             statistics.covariance = cov(asset_returns);
             statistics.standard_deviation = sqrt(diag(              ...
@@ -88,16 +86,10 @@ classdef portfolio
                     self.assets{i} = assets{i};
                 end
             end
-            
-            
+
             self.statistics = calculate_portfolio_statistics(self);
             self.optimization = optimize_asset_allocation(self);
             
         end
-        
-        function display(self)
-            
-        end
-        
     end
 end
