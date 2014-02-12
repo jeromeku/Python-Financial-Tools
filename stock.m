@@ -1,3 +1,16 @@
+% Stock.m: A MATLAB object representing a stock as downloaded from Yahoo
+%       Finance! in MATLAB. A stock object is instantiated by specifying a 
+%       ticker and, optionally, a start and end date in the format 
+%       "mm/dd/yyyy".
+%
+% The stock object is completely specified by its ticker and a pair of
+% dates across which is aggregates financial data. The stock class then
+% computes the returns, the expected return, and the gross return based on
+% daily price information. 
+%
+% The stock class supports operations to calculate the value-at-risk, and
+% utility functions to graph either the daily prices, or the daily returns.
+
 classdef stock
     properties
         ticker;
@@ -58,7 +71,7 @@ classdef stock
                 self.dates.begin = start_date;
                 self.dates.end = end_date;
             end
-
+            
             self.profile = yahoo_download_daily(self);
             self.statistics = calculate_stock_statistics(self);
             
