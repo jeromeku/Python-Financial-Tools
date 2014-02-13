@@ -23,6 +23,7 @@ from urllib2 import Request, urlopen
 from urllib import urlencode
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from scipy import stats
 
 class Stock:
     def __init__(self,ticker,date_range):
@@ -72,8 +73,27 @@ class Stock:
         statistics["expected_return"] = np.mean(statistics["returns"])
         return statistics
 
-    def calculate_parameter_var(self):
-        pass
+    def calculate_parametric_value_at_risk(self,alpha,position):
+        returns = self.statistics["returns"]
+        
+        # Fit a t-distribution to the daily returns data using the 
+        # method of maximum likelihood estimation.
+        tdof, tloc, tscale = stats.t.fit(returns)
+        quantile = stats.t.ppf(1 - alpha, tdof, tloc, tscale)
+
+        # Assuming that returns are i.i.d. with a t-distribution, it
+        # can be shown that value-at-risk is calculated as:
+        #      VaR_t(alpha) = -S * {mu + q_{alpha}(nu) * lambda}
+        # Is this formula, S refers to the size of the position. The 
+        # parameters mu, lambda, and scale are the estimated mean, 
+        # scale, and degrees of freedom of the sample returns. The
+        # parameter q_{alpha}(nu) is the alpha-quantile of a 
+        # t-distribution with nu degrees of freedom. Refer to page 
+        # 510 in Statistics and Data Analysis for Financial 
+        # Engineering.
+        value_at_risk = -position * (tloc + quantile * tscale)
+        return value_at_risk
+
 
     def display_price(self):
         sorted_dates = sorted(self.profile.keys())
@@ -142,4 +162,9 @@ class Stock:
         return historical_data
 
 
-
+date_range = {"start" : "2012-01-03", "end" : "2013-01-08"}
+ticker = "GOOG"
+stock = Stock(ticker,date_range)
+# stock.display_price()
+print stock
+stock.calculate_parametric_value_at_risk(.05,1)

@@ -1,9 +1,6 @@
 import numpy as np
 from scipy.stats import norm
-from pprint import pprint
-
 from stock import Stock
-
 
 class CAPM:
     def __init__(self,risk_free,market):
