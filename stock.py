@@ -1,6 +1,6 @@
 # Stock.py: A Python class representing a stock as downloaded from Yahoo
 #       Finance! A stock object is instantiated by specifying a ticker
-#       and, optionally, a start and end date in the format "mm/dd/yyyy".
+#       and, optionally, a start and end date in the format "yyyy/mm/dd".
 #
 # The stock object is completely specified by its ticker and a pair of
 # dates across which is aggregates financial data. The stock class then
@@ -9,6 +9,14 @@
 #
 # The stock class supports operations to calculate the value-at-risk, and
 # utility functions to graph the daily prices.
+#
+# The following is an example usage of the stock class to download
+# historical stock information from Google over a specified period:
+#       date_range = {"start" : "2012-01-03", "end" : "2013-01-08"}
+#       ticker = "GOOG"
+#       stock = Stock(ticker,date_range)
+#       stock.display_price()
+#       print stock
 
 import numpy as np
 from urllib2 import Request, urlopen
@@ -48,6 +56,11 @@ class Stock:
         closing_prices = np.array(
             [np.float(self.profile[day]["Close"]) for day in self.profile.keys()]
             )
+
+        # Occasionally, values of zero are obtained as an asset price. In all likelihood, this
+        # value is rubbish and cannot be trusted, as it implies that the asset has no value. 
+        # In these cases, we replace the reported asset price by the mean of all asset prices.
+        closing_prices[closing_prices == 0] = np.mean(closing_prices)
 
         # Calculate the daily returns on the stock option. These calculation is
         # defined by the formula:
@@ -129,10 +142,4 @@ class Stock:
         return historical_data
 
 
-date_range = {"start" : "2012-01-03", "end" : "2013-01-08"}
-ticker = "GOOG"
-stock = Stock(ticker,date_range)
 
-stock.display_price()
-
-print stock
