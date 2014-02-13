@@ -23,15 +23,27 @@ from urllib2 import Request, urlopen
 from urllib import urlencode
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import datetime
 from scipy import stats
 
 class Stock:
-    def __init__(self,ticker,date_range):
+    def __init__(self,ticker,date_range = None):
         self.ticker = ticker
-        self.date_range = date_range
+
+        if date_range is not None:
+            self.date_range = date_range
+        else:
+            # If there was no specified time interval, presume that the
+            # user intends to download historical price data from the 
+            # past year. Notice that the end of the time interval is 
+            # today, while the start is one year in the past.
+            end = datetime.datetime.now().strftime("%Y-%m-%d")
+            start = (datetime.datetime.now() - datetime.timedelta(days = 365)).strftime("%Y-%m-%d")
+            self.date_range = {"start" : start, "end" : end}
+            
         self.profile = self.yahoo_download_daily()
         self.statistics = self.calculate_statistics()
-    
+        
     def __str__(self):
         print_string = "Ticker: " + self.ticker + "\n"
         print_string += "Time series: From " + self.date_range["start"] + " to " + self.date_range["end"] + "\n\n"
@@ -160,11 +172,3 @@ class Stock:
                 keys[6]: day_data[6]
                 }
         return historical_data
-
-
-date_range = {"start" : "2012-01-03", "end" : "2013-01-08"}
-ticker = "GOOG"
-stock = Stock(ticker,date_range)
-# stock.display_price()
-print stock
-stock.calculate_parametric_value_at_risk(.05,1)
