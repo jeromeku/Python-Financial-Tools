@@ -13,8 +13,8 @@ class CAPM:
         self.beta = {}
         self.critical_value = norm.ppf(.975)
 
-    def asset_regression(self,asset_dictionary):
-        asset = Stock(asset_dictionary["ticker"],asset_dictionary["date_range"])
+    def asset_regression(self,asset_data):
+        asset = Stock(asset_data["ticker"],asset_data["date_range"]) if type(asset_data) is dict else Stock(asset_data)
         market_premium = np.atleast_2d(self.market.statistics["returns"] - self.risk_free.statistics["returns"]).T
         asset_premium = np.atleast_2d(asset.statistics["returns"] - self.risk_free.statistics["returns"]).T
         

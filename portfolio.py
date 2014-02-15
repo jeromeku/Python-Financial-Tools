@@ -31,6 +31,8 @@ class Portfolio:
         return statistics
 
     def optimize_portfolio(self):
+        optimization = {}
+
         n = self.n
         S = matrix(2 * self.statistics["covariance"])
         pbar = matrix(self.statistics["mean"])
@@ -42,7 +44,6 @@ class Portfolio:
         
         mu_array = [10**(5.0*t/100-1.0) for t in range(100)]
         
-        
         solvers.options['show_progress'] = False
         
         portfolio_weights = [solvers.qp(mu*S,-pbar,G,h,A,b)['x'] for mu in mu_array]
@@ -50,8 +51,25 @@ class Portfolio:
         risk = [np.sqrt(dot(w,S*w)) for w in portfolio_weights]
         
         mu_free = self.risk_free.statistics["returns"][-1]
-        sharpe_ratio = (mu_array - mu_free) / risk
+        sharpe_ratio = (returns - mu_free) / risk
         sharpe_index = sharpe_ratio == max(sharpe_ratio)
         
+        optimization["returns"] = returns
+        optimization["risk"] = risk
+
+        # If possible, try to decrease the number of for loops used to extract the
+        # optimal weights of the portfolio. At the time of writing this, it seems
+        # that the matrix data structure is somewhat bizarre. Therefore, in order to 
+        # generate the desired numpy array object, so many for loops turned out to 
+        # be necessary.
+        optimization_weights = [portfolio_weights[i] for i in range(len(portfolio_weights)) if sharpe_index[i]]
+        optimization["weights"] = np.zeros((n,1))
+        
+        for i in range(len(optimization_weights[0])):
+            optimization["weights"][i] = optimization_weights[0][i]
+        
+        return optimization
+                
+
 portfolio = Portfolio(["MSFT","GOOG","IBM"])
 
