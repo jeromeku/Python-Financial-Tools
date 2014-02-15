@@ -1,5 +1,9 @@
+<<<<<<< HEAD
 # portfolio.py  This class represents a portfolio of stocks. It supports optimization
 #      of assets via a quadratic program.
+=======
+# portfolio.py  This class represents a portfolio of stocks
+>>>>>>> 159c9a232c60d0c2bfbc333a73752717557e19df
 
 
 import numpy as np
