@@ -5,6 +5,7 @@ from pprint import pprint
 from cvxopt import matrix
 from cvxopt.blas import dot
 from cvxopt import solvers
+from scipy import stats
 
 class Portfolio:
     def __init__(self,assets,risk_free = None):
@@ -29,6 +30,18 @@ class Portfolio:
         statistics["covariance"] = np.cov(returns,rowvar = 0)
         statistics["standard_deviation"] = np.sqrt(np.diag(statistics["covariance"]))
         return statistics
+
+    def calculate_parametric_value_at_risk(self,alpha,position):
+        mu = self.statistics["mean"]
+        S = self.statistics["covariance"]
+        w = self.optimization["weights"]
+        portfolio_mu = np.dot(mu,w)
+        portfolio_sigma = np.sqrt(np.dot(np.dot(w.T,S),w))[0]
+        
+        quantile = stats.norm.ppf(1 - alpha)
+        value_at_risk = -position * (portfolio_mu + quantile * portfolio_sigma)
+        
+        return value_at_risk
 
     def optimize_portfolio(self):
         optimization = {}
@@ -56,6 +69,7 @@ class Portfolio:
         
         optimization["returns"] = returns
         optimization["risk"] = risk
+<<<<<<< HEAD
 
         # If possible, try to decrease the number of for loops used to extract the
         # optimal weights of the portfolio. At the time of writing this, it seems
@@ -72,4 +86,22 @@ class Portfolio:
                 
 
 portfolio = Portfolio(["MSFT","GOOG","IBM"])
+=======
+>>>>>>> db0fb24ec760dc652b66cc861393d013c1e430cc
 
+        # If possible, try to decrease the number of for loops used to extract the
+        # optimal weights of the portfolio. At the time of writing this, it seems
+        # that the matrix data structure is somewhat bizarre. Therefore, in order to 
+        # generate the desired numpy array object, so many for loops turned out to 
+        # be necessary.
+        optimization_weights = [portfolio_weights[i] for i in range(len(portfolio_weights)) if sharpe_index[i]]
+        optimization["weights"] = np.zeros((n,1))
+        
+        for i in range(len(optimization_weights[0])):
+            optimization["weights"][i] = optimization_weights[0][i]
+        
+        return optimization
+                
+
+portfolio = Portfolio(["MSFT","GOOG","IBM"])
+portfolio.calculate_parametric_value_at_risk(.05,1000)

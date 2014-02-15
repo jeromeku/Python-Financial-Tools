@@ -1,4 +1,4 @@
-# CAPM.py: A Python class representing the CAPM model given
+# capm.py: A Python class representing the CAPM model given
 #       the risk free rate and market returns.  The object
 #       can be instantiated given Stock objects representing
 #		the risk free and market data or their respective
