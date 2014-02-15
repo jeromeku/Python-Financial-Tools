@@ -1,8 +1,5 @@
 # portfolio.py  This class represents a portfolio of stocks. It supports optimization
 #      of assets via a quadratic program.
-#
-#
-
 
 import numpy as np
 from stock import Stock
@@ -36,17 +33,22 @@ class Portfolio:
         statistics["standard_deviation"] = np.sqrt(np.diag(statistics["covariance"]))
         return statistics
 
-    def calculate_parametric_value_at_risk(self,alpha,position):
+    def calculate_parametric_risk(self,alpha,position,expected_shortfall = False):
         mu = self.statistics["mean"]
         S = self.statistics["covariance"]
         w = self.optimization["weights"]
         portfolio_mu = np.dot(mu,w)
         portfolio_sigma = np.sqrt(np.dot(np.dot(w.T,S),w))[0]
 
-        quantile = stats.norm.ppf(1 - alpha)
-        value_at_risk = -position * (portfolio_mu + quantile * portfolio_sigma)
+        quantile = stats.norm.ppf(alpha)
 
-        return value_at_risk
+        if expected_shortfall:
+            risk = position * (-portfolio_mu + portfolio_sigma * (stats.norm.pdf(quantile) / alpha))
+        else:
+            risk = -position * (portfolio_mu + quantile * portfolio_sigma)
+
+        return risk
+
 
     def optimize_portfolio(self):
         optimization = {}
@@ -88,6 +90,6 @@ class Portfolio:
 
         return optimization
 
-
 portfolio = Portfolio(["MSFT","GOOG","IBM"])
-portfolio.calculate_parametric_value_at_risk(.05,1000)
+print "The value at risk: %.2f" % portfolio.calculate_parametric_risk(.05,1000)
+print "The expected shortfall: %.2f" % portfolio.calculate_parametric_risk(.05,1000,True)

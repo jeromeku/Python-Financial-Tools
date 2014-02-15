@@ -91,7 +91,7 @@ class Stock:
         # Fit a t-distribution to the daily returns data using the 
         # method of maximum likelihood estimation.
         tdof, tloc, tscale = stats.t.fit(returns)
-        quantile = stats.t.ppf(1 - alpha, tdof, tloc, tscale)
+        quantile = stats.t.ppf(alpha, tdof, tloc, tscale)
 
         # Assuming that returns are i.i.d. with a t-distribution, it
         # can be shown that value-at-risk is calculated as:
