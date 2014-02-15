@@ -1,4 +1,4 @@
-Python-Financial-Tools
+Python Financial Tools
 ======================
 
 An open-source Python implementation of popular tools and techniques in financial asset management. The purpose of this repository is to provide high-quality financial data analytics software. The software relies on Yahoo Finance! to download the most recent trends in asset performance.
