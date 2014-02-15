@@ -1,6 +1,9 @@
+<<<<<<< HEAD
 # portfolio.py  This class represents a portfolio of stocks. It supports optimization
 #      of assets via a quadratic program.
-
+=======
+# portfolio.py  This class represents a portfolio of stocks
+>>>>>>> 159c9a232c60d0c2bfbc333a73752717557e19df
 
 
 import numpy as np
@@ -73,6 +76,25 @@ class Portfolio:
 
         optimization["returns"] = returns
         optimization["risk"] = risk
+<<<<<<< HEAD
+
+        # If possible, try to decrease the number of for loops used to extract the
+        # optimal weights of the portfolio. At the time of writing this, it seems
+        # that the matrix data structure is somewhat bizarre. Therefore, in order to 
+        # generate the desired numpy array object, so many for loops turned out to 
+        # be necessary.
+        optimization_weights = [portfolio_weights[i] for i in range(len(portfolio_weights)) if sharpe_index[i]]
+        optimization["weights"] = np.zeros((n,1))
+        
+        for i in range(len(optimization_weights[0])):
+            optimization["weights"][i] = optimization_weights[0][i]
+        
+        return optimization
+                
+
+portfolio = Portfolio(["MSFT","GOOG","IBM"])
+=======
+>>>>>>> db0fb24ec760dc652b66cc861393d013c1e430cc
 
         # If possible, try to decrease the number of for loops used to extract the
         # optimal weights of the portfolio. At the time of writing this, it seems
