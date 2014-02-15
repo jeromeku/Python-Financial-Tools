@@ -3,7 +3,6 @@
 
 import numpy as np
 from stock import Stock
-from pprint import pprint
 from cvxopt import matrix
 from cvxopt.blas import dot
 from cvxopt import solvers
@@ -36,7 +35,7 @@ class Portfolio:
     def calculate_parametric_risk(self,alpha,position,expected_shortfall = False):
         mu = self.statistics["mean"]
         S = self.statistics["covariance"]
-        w = self.optimization["weights"]
+        w = self.optimization["max_sharpe_weights"]
         portfolio_mu = np.dot(mu,w)
         portfolio_sigma = np.sqrt(np.dot(np.dot(w.T,S),w))[0]
 
@@ -72,7 +71,8 @@ class Portfolio:
 
         mu_free = self.risk_free.statistics["returns"][-1]
         sharpe_ratio = (returns - mu_free) / risk
-        sharpe_index = sharpe_ratio == max(sharpe_ratio)
+        max_sharpe_index = sharpe_ratio == max(sharpe_ratio)
+        min_variance_index = risk == min(risk)
 
         optimization["returns"] = returns
         optimization["risk"] = risk
@@ -82,11 +82,15 @@ class Portfolio:
         # that the matrix data structure is somewhat bizarre. Therefore, in order to
         # generate the desired numpy array object, so many for loops turned out to
         # be necessary.
-        optimization_weights = [portfolio_weights[i] for i in range(len(portfolio_weights)) if sharpe_index[i]]
-        optimization["weights"] = np.zeros((n,1))
+        max_sharpe_weights = [portfolio_weights[i] for i in range(len(portfolio_weights)) if max_sharpe_index[i]]
+        min_variance_weights = [portfolio_weights[i] for i in range(len(portfolio_weights)) if min_variance_index[i]]
+        optimization["max_sharpe_weights"] = np.zeros((n,1))
+        optimization["min_variance_weights"] = np.zeros((n,1))
 
-        for i in range(len(optimization_weights[0])):
-            optimization["weights"][i] = optimization_weights[0][i]
+        for i in range(len(max_sharpe_weights[0])):
+            optimization["max_sharpe_weights"][i] = max_sharpe_weights[0][i]
+        for i in range(len(min_variance_weights[0])):
+            optimization["min_variance_weights"][i] = min_variance_weights[0][i]
 
         return optimization
 
