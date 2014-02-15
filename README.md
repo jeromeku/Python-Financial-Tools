@@ -13,14 +13,22 @@ An open-source Python implementation of popular tools and techniques in financia
 ```
 If you like project and want to cite this toolbox, please use the following citation:
 
-Brofos, James A., and Ajay Kannan. Python Financial Tools. Computer software. Vers. 0.1. GitHub, Inc., 08 Feb. 2014. Web. [Day] [MM]. [YYYY].
+Brofos, James A., and Ajay Kannan. Python Financial Tools. Computer software.
+Vers. 0.1. GitHub, Inc., 08 Feb. 2014. Web. [Day] [MM]. [YYYY].
 ```
 
-Demo
-----
+## Demo
 
-Dependencies
-------------
+
+
+## Dependencies
+
+Python Financial Tools relies on the libraries listed below:
+
+* [Numpy](http://www.numpy.org/) Standard numerical computations with vectors
+* [Scipy](http://www.scipy.org/) Used for calculations involving statistical distributions
+* [Matplotlib](http://matplotlib.org/) Visualizations of historical prices and returns
+* [CVXOPT](http://cvxopt.org/) Optimization toolbox for portfolio asset allocation
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/JamesBrofos/python-financial-tools/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
