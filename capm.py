@@ -5,8 +5,8 @@ from stock import Stock
 class CAPM:
     def __init__(self,risk_free,market):
         # 
-        self.risk_free = Stock(risk_free["ticker"],risk_free["date_range"])
-        self.market = Stock(market["ticker"],market["date_range"])
+        self.risk_free = Stock(risk_free["ticker"],risk_free["date_range"]) if type(risk_free) is dict else Stock(risk_free)
+        self.market = Stock(market["ticker"],market["date_range"]) if type(market) is dict else Stock(market)
 
         # 
         self.alpha = {}
@@ -42,8 +42,6 @@ class CAPM:
 
         self.beta["value"] = theta[1]
         self.beta["confidence_interval"] = theta[1] + standard_errors[1,1] * self.critical_value * np.array([-1,1])
-        
-
     
 date_range = {"start" : "2012-01-03", "end" : "2013-01-08"}
 tickers = ("^IRX","^GSPC","GOOG")

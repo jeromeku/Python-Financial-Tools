@@ -2,11 +2,19 @@
 import numpy as np
 from stock import Stock
 from pprint import pprint
-from cvxopt import matrix, solvers
+from cvxopt import matrix
+from cvxopt.blas import dot
+from cvxopt import solvers
 
 class Portfolio:
-    def __init__(self,assets):
+    def __init__(self,assets,risk_free = None):
         self.assets = [Stock(stock["ticker"],stock["date_range"]) if type(stock) is dict else Stock(stock) for stock in assets]
+        
+        if risk_free is not None:
+            self.risk_free = Stock(risk_free["ticker"],risk_free["date_range"]) if type(risk_free) is dict else Stock(risk_free)
+        else:
+            self.risk_free = Stock("^IRX")
+
         self.n = len(self.assets)
         self.statistics = self.calculate_statistics()
         self.optimization = self.optimize_portfolio()
@@ -23,22 +31,27 @@ class Portfolio:
         return statistics
 
     def optimize_portfolio(self):
-        P = 2 * self.statistics["covariance"]
         n = self.n
-
-        n_expected_returns = 300
-        expected_returns = np.linspace(.05,.14,n_expected_returns)
-        standard_deviations = np.nan((n_expected_returns,1))
-        weights = np.nan((n_expected_returns,n))
+        S = matrix(2 * self.statistics["covariance"])
+        pbar = matrix(self.statistics["mean"])
+        G = matrix(0.0, (n,n))
+        G[::n+1] = -1.0
+        h = matrix(0.0, (n,1))
+        A = matrix(1.0, (1,n))
+        b = matrix(1.0)
+        
+        mu_array = [10**(5.0*t/100-1.0) for t in range(100)]
         
         
+        solvers.options['show_progress'] = False
         
-
+        portfolio_weights = [solvers.qp(mu*S,-pbar,G,h,A,b)['x'] for mu in mu_array]
+        returns = [dot(pbar,w) for w in portfolio_weights]
+        risk = [np.sqrt(dot(w,S*w)) for w in portfolio_weights]
         
-
-
+        mu_free = self.risk_free.statistics["returns"][-1]
+        sharpe_ratio = (mu_array - mu_free) / risk
+        sharpe_index = sharpe_ratio == max(sharpe_ratio)
+        
 portfolio = Portfolio(["MSFT","GOOG","IBM"])
-# for asset in portfolio.assets:
-#     print asset
-
 
