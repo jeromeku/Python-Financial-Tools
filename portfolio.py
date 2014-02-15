@@ -21,6 +21,9 @@ class Portfolio:
         self.statistics = self.calculate_statistics()
         self.optimization = self.optimize_portfolio()
 
+    def calculate_portfolio_returns(self):
+        pass
+
     def calculate_statistics(self):
         statistics = {}
         returns = np.zeros((len(self.assets[0].statistics["returns"]),self.n))
