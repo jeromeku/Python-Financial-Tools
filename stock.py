@@ -26,7 +26,7 @@ import matplotlib.dates as mdates
 import datetime
 from scipy import stats
 
-class Stock:
+class Stock(object):
     def __init__(self,ticker,date_range = None):
         self.ticker = ticker
 

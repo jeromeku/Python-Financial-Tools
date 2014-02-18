@@ -17,12 +17,11 @@
 #                   {"ticker" : tickers[1],"date_range" : date_range})
 #       capm.asset_regression({"ticker" : tickers[2],"date_range" : date_range})
 
-
 import numpy as np
 from scipy.stats import norm
 from stock import Stock
 
-class CAPM:
+class CAPM(object):
     def __init__(self,risk_free,market):
         #
         self.risk_free = Stock(risk_free["ticker"],risk_free["date_range"]) if type(risk_free) is dict else Stock(risk_free)

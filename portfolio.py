@@ -8,7 +8,7 @@ from cvxopt.blas import dot
 from cvxopt import solvers
 from scipy import stats
 
-class Portfolio:
+class Portfolio(object):
     def __init__(self,assets,risk_free = None):
         self.assets = [Stock(stock["ticker"],stock["date_range"]) if type(stock) is dict else Stock(stock) for stock in assets]
 
