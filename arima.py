@@ -25,7 +25,7 @@ class AR(object):
 
 		regression["mu"] = mu[0]
 		regression["phi"] = phi[0]
-		return regress
+		return regression
 
 	def calculate_times_series_order(self):
 		# For the moment, naively assume that the order of the time
