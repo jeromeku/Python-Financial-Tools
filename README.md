@@ -14,7 +14,7 @@ An open-source Python implementation of popular tools and techniques in financia
 If you like project and want to cite this toolbox, please use the following citation:
 
 Brofos, James A., and Ajay Kannan. Python Financial Tools. Computer software. 
-Vers. 0.1. GitHub, Inc., 08 Feb. 2014. Web. [Day] [MM]. [YYYY].
+Vers. 0.1. GitHub, Inc., 08 Feb. 2014. Web. [DD] [MM]. [YYYY].
 ```
 
 ## Demo
