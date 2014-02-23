@@ -1,5 +1,10 @@
 # portfolio.py  This class represents a portfolio of stocks. It supports optimization
 #      of assets via a quadratic program.
+# The following is an example of how the portfolio class may be used to represent a
+# portfolio of assets representing major technology companies:
+#       portfolio = Portfolio(["MSFT","GOOG","IBM"])
+#       print "The value at risk: %.2f" % portfolio.calculate_parametric_risk(.05,1000)
+#       print "The expected shortfall: %.2f" % portfolio.calculate_parametric_risk(.05,1000,True)
 
 import numpy as np
 from stock import Stock
@@ -9,7 +14,13 @@ from cvxopt import solvers
 from scipy import stats
 
 class Portfolio(object):
-    def __init__(self,assets,risk_free = None):
+    def __init__(self,assets,risk_free = None,position = None):
+        # The position refers to the dollar amount invested into this particular
+        # portfolio. The position can be allocated so that it corresponds to the
+        # portfolio with the maximum sharpe's ratio, or to the portfolio with the
+        # minimum risk.
+        self.position = position if position is not None else None
+
         self.assets = [Stock(stock["ticker"],stock["date_range"]) if type(stock) is dict else Stock(stock) for stock in assets]
 
         if risk_free is not None:
@@ -20,6 +31,13 @@ class Portfolio(object):
         self.n = len(self.assets)
         self.statistics = self.calculate_statistics()
         self.optimization = self.optimize_portfolio()
+
+    def __str__(self):
+        print_string = "Assets in portfolio: [" + " ".join([asset.ticker for asset in self.assets]) + "]\n\n"
+        for asset in self.assets:
+            print_string += asset.__str__()
+
+        return print_string
 
     def calculate_portfolio_returns(self):
         pass
@@ -32,10 +50,25 @@ class Portfolio(object):
             returns[:,i] = self.assets[i].statistics["returns"]
         statistics["mean"] = np.mean(returns,axis = 0)
         statistics["covariance"] = np.cov(returns,rowvar = 0)
-        statistics["standard_deviation"] = np.sqrt(np.diag(statistics["covariance"]))
+
+        # Due to the behavior of the numpy "diag" function, scalar inputs will fail and 
+        # produce an error. This instance occurs when there is only a single asset in the
+        # portfolio. In this case, simply exclude the call to "diag" and calculate the 
+        # standard deviation and the square root of a scalar covariance "matrix".
+        if statistics["covariance"].shape == ():
+            statistics["standard_deviation"] = np.sqrt(statistics["covariance"])
+        else:
+            statistics["standard_deviation"] = np.sqrt(np.diag(statistics["covariance"]))
         return statistics
 
-    def calculate_parametric_risk(self,alpha,position,expected_shortfall = False):
+    def calculate_parametric_risk(self,alpha,expected_shortfall = False,position = None):
+
+        if position is None and self.position is not None:
+            position = self.position
+        elif position is None and self.position is None:
+            print "Either specify a position for the portfolio object or provide one as an input parameter."
+            return np.nan
+
         mu = self.statistics["mean"]
         S = self.statistics["covariance"]
         w = self.optimization["max_sharpe_weights"]
@@ -51,6 +84,9 @@ class Portfolio(object):
 
         return risk
 
+
+    def optimize_kelly_criterion(self):
+        pass
 
     def optimize_portfolio(self):
         optimization = {}
@@ -96,7 +132,3 @@ class Portfolio(object):
             optimization["min_variance_weights"][i] = min_variance_weights[0][i]
 
         return optimization
-
-portfolio = Portfolio(["MSFT","GOOG","IBM"])
-print "The value at risk: %.2f" % portfolio.calculate_parametric_risk(.05,1000)
-print "The expected shortfall: %.2f" % portfolio.calculate_parametric_risk(.05,1000,True)

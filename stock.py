@@ -27,8 +27,9 @@ import datetime
 from scipy import stats
 
 class Stock(object):
-    def __init__(self,ticker,date_range = None):
+    def __init__(self,ticker,date_range = None,position = None):
         self.ticker = ticker
+        self.position = position if position is not None else None
 
         if date_range is not None:
             self.date_range = date_range
@@ -40,9 +41,13 @@ class Stock(object):
             end = datetime.datetime.now().strftime("%Y-%m-%d")
             start = (datetime.datetime.now() - datetime.timedelta(days = 365)).strftime("%Y-%m-%d")
             self.date_range = {"start" : start, "end" : end}
-            
-        self.profile = self.yahoo_download_daily()
-        self.statistics = self.calculate_statistics()
+
+        try:
+            self.profile = self.yahoo_download_daily()
+            self.statistics = self.calculate_statistics()
+        except:
+            print "Invalid ticker symbol specified or else there was not an internet connection available."
+        
         
     def __str__(self):
         print_string = "Ticker: " + self.ticker + "\n"
@@ -85,7 +90,14 @@ class Stock(object):
         statistics["expected_return"] = np.mean(statistics["returns"])
         return statistics
 
-    def calculate_parametric_value_at_risk(self,alpha,position):
+    def calculate_parametric_risk(self,alpha,position = None):
+
+        if position is None and self.position is not None:
+            position = self.position
+        elif position is None and self.position is None:
+            print "Either specify a position for the stock object or provide one as an input parameter."
+            return np.nan
+
         returns = self.statistics["returns"]
         
         # Fit a t-distribution to the daily returns data using the 
@@ -172,3 +184,4 @@ class Stock(object):
                 keys[6]: day_data[6]
                 }
         return historical_data
+
