@@ -1,5 +1,6 @@
 # portfolio.py  This class represents a portfolio of stocks. It supports optimization
 #      of assets via a quadratic program.
+#
 # The following is an example of how the portfolio class may be used to represent a
 # portfolio of assets representing major technology companies:
 #       portfolio = Portfolio(["MSFT","GOOG","IBM"])
@@ -31,16 +32,25 @@ class Portfolio(object):
         self.n = len(self.assets)
         self.statistics = self.calculate_statistics()
         self.optimization = self.optimize_portfolio()
+        self.returns = self.calculate_portfolio_returns()
 
     def __str__(self):
         print_string = "Assets in portfolio: [" + " ".join([asset.ticker for asset in self.assets]) + "]\n\n"
         for asset in self.assets:
-            print_string += asset.__str__()
+            print_string += asset.__str__() + "\n\n"
+        print_string += "The weights for each asset in the portfolio:\n"
+        for i in range(self.n):
+            print_string += "\t" + self.assets[i].ticker + "\t: " + str(self.optimization["max_sharpe_weights"][i][0]) + "\n"
+        print_string += "\nExpected return: %.4f" % self.returns
 
         return print_string
 
     def calculate_portfolio_returns(self):
-        pass
+        returns = 0.0
+        for i in range(self.n):
+            returns += self.assets[i].statistics["expected_return"] * self.optimization["max_sharpe_weights"][i][0]
+        return returns
+
 
     def calculate_statistics(self):
         statistics = {}
@@ -48,7 +58,8 @@ class Portfolio(object):
 
         for i in range(self.n):
             returns[:,i] = self.assets[i].statistics["returns"]
-        statistics["mean"] = np.mean(returns,axis = 0)
+
+        statistics["mean"] = np.array([asset.statistics["expected_return"] for asset in self.assets])
         statistics["covariance"] = np.cov(returns,rowvar = 0)
 
         # Due to the behavior of the numpy "diag" function, scalar inputs will fail and 
@@ -86,7 +97,36 @@ class Portfolio(object):
 
 
     def optimize_kelly_criterion(self):
-        pass
+        # This code attempts to reproduce the optimization routine proposed by 
+        # Vasily Nekrasov using the Kelly criterion. In particular, this code 
+        # uses as reference the following work:
+        #
+        # Nekrasov, Vasily. 2013. "Kelly Criterion for Multivariate Portfolios: 
+        # A Model-Free Approach".
+
+        kelly_optimization = {}
+
+        n = self.n
+        r = self.risk_free.statistics["expected_return"]
+        S = matrix(1.0 / ((1 + r) ** 2) * self.statistics["covariance"])
+        r_assets = matrix(self.statistics["mean"])
+
+        q = matrix(1.0 / (1 + r)) * (r_assets - r)
+
+        # This code is exactly reproduced from the routine for optimizing the portfolio
+        # according to the maximum Sharpe's ratio and minimum variance criteria. As a 
+        # result, it may be beneficial to encapsulate this code.
+        G = matrix(0.0, (n,n))
+        G[::n+1] = -1.0
+        h = matrix(0.0, (n,1))
+        A = matrix(1.0, (1,n))
+        b = matrix(1.0)
+
+        portfolio_weights = solvers.qp(S,q,G,h,A,b)["x"]
+    
+        kelly_optimization["weights"] = portfolio_weights
+        return kelly_optimization
+
 
     def optimize_portfolio(self):
         optimization = {}
@@ -102,9 +142,9 @@ class Portfolio(object):
 
         mu_array = [10**(5.0*t/100-1.0) for t in range(100)]
 
-        solvers.options['show_progress'] = False
+        solvers.options["show_progress"] = False
 
-        portfolio_weights = [solvers.qp(mu*S,-pbar,G,h,A,b)['x'] for mu in mu_array]
+        portfolio_weights = [solvers.qp(mu*S,-pbar,G,h,A,b)["x"] for mu in mu_array]
         returns = [dot(pbar,w) for w in portfolio_weights]
         risk = [np.sqrt(dot(w,S*w)) for w in portfolio_weights]
 
@@ -132,3 +172,9 @@ class Portfolio(object):
             optimization["min_variance_weights"][i] = min_variance_weights[0][i]
 
         return optimization
+
+portfolio = Portfolio(["MSFT","GOOG","IBM"])
+print portfolio
+
+portfolio.optimize_kelly_criterion()
+

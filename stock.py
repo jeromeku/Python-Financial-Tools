@@ -87,7 +87,12 @@ class Stock(object):
         # Engineering. For the expected return, we simply take the mean value of
         # the calculated daily returns.
         statistics["returns"] = closing_prices[1:] / closing_prices[:-1] - 1
-        statistics["expected_return"] = np.mean(statistics["returns"])
+
+        # Multiply the average daily return by the length of the time series in order to
+        # obtain the expected return over the entire period.
+        statistics["expected_daily_return"] = np.mean(statistics["returns"])
+        statistics["expected_return"] = statistics["expected_daily_return"] * len(statistics["returns"])
+        
         return statistics
 
     def calculate_parametric_risk(self,alpha,position = None):
