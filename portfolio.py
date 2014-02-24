@@ -117,16 +117,8 @@ class Portfolio(object):
         r_assets = matrix([asset.statistics["expected_daily_return"] for asset in self.assets])
 
         q = matrix(1.0 / (1 + r) * (r_assets - r))
+        G, h, A, b = self.optimization_constraint_matrices()
 
-        # This code is exactly reproduced from the routine for optimizing the portfolio
-        # according to the maximum Sharpe's ratio and minimum variance criteria. As a 
-        # result, it may be beneficial to encapsulate this code.
-        G = matrix(0.0, (n,n))
-        G[::n+1] = -1.0
-        h = matrix(0.0, (n,1))
-        A = matrix(1.0, (1,n))
-        b = matrix(1.0)
-        
         # Notice that the "linear" term in the quadratic optimization formulation is made 
         # negative. This is because Nekrasov maximizes the function, whereas CXVOPT is forced
         # to minimize. By making the linear term negative, we arrive at an equivalent 
@@ -141,17 +133,13 @@ class Portfolio(object):
 
         n = self.n
         S = matrix(2 * self.statistics["covariance"])
-        pbar = matrix(self.statistics["expected_asset_returns"])
-        G = matrix(0.0, (n,n))
-        G[::n+1] = -1.0
-        h = matrix(0.0, (n,1))
-        A = matrix(1.0, (1,n))
-        b = matrix(1.0)
+        expected_returns = matrix(self.statistics["expected_asset_returns"])
+        G, h, A, b = self.optimization_constraint_matrices()
 
         mu_array = [10**(5.0*t/100-1.0) for t in range(100)]
 
-        portfolio_weights = [solvers.qp(mu*S,-pbar,G,h,A,b)["x"] for mu in mu_array]
-        returns = [dot(pbar,w) for w in portfolio_weights]
+        portfolio_weights = [solvers.qp(mu*S,-expected_returns,G,h,A,b)["x"] for mu in mu_array]
+        returns = [dot(expected_returns,w) for w in portfolio_weights]
         risk = [np.sqrt(dot(w,S*w)) for w in portfolio_weights]
 
         mu_free = self.risk_free.statistics["returns"][-1]
@@ -178,6 +166,16 @@ class Portfolio(object):
             optimization["min_variance_weights"][i] = min_variance_weights[0][i]
 
         return optimization
+
+    def optimization_constraint_matrices(self):
+        n = self.n
+        G = matrix(0.0, (n,n))
+        G[::n+1] = -1.0
+        h = matrix(0.0, (n,1))
+        A = matrix(1.0, (1,n))
+        b = matrix(1.0)
+
+        return G, h, A, b
 
 portfolio = Portfolio(["MSFT","GOOG","IBM"])
 print portfolio

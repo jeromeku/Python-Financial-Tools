@@ -87,6 +87,7 @@ class Stock(object):
         # Engineering. For the expected return, we simply take the mean value of
         # the calculated daily returns.
         statistics["returns"] = closing_prices[1:] / closing_prices[:-1] - 1
+        statistics["log_returns"] = np.log(statistics["returns"] + 1)
 
         # Multiply the average daily return by the length of the time series in order to
         # obtain the expected return over the entire period.
