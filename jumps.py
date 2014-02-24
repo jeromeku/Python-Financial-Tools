@@ -1,7 +1,7 @@
-
 import numpy as np
 from stock import Stock
 from scipy.special import gamma
+from scipy import stats
 
 class JumpStatistics(object):
 	def __init__(self,stock):
@@ -18,6 +18,18 @@ class BarndorffNielsen(JumpStatistics):
 	# "Some Like it Smooth, and Some Like it Rough: Untangling Continuous and Jump 
 	# Components in Measuring, Modeling, and Forecasting Asset Return Volatility".
 	# Torben G. Andersen, Tim Bollerslev and Francis X. Diebold. September 2003.
+	#
+	# The following is an example of how to apply the Barnforff-Nielsen statistic to detect
+	# surprises in Microsoft stock data:
+	#       if True:
+	# 			# Observe a trend in Microsoft stock prices where a jump occurs.
+	#			stock = Stock("MSFT",{"start" : "2013-02-14","end" : "2014-02-14"})
+	# 		else:
+	# 			# Otherwise, view a sequence of stock prices where no jump was detected.
+	# 			stock = Stock("MSFT",{"start" : "2013-03-01","end" : "2013-04-01"})
+	# 		stock.display_price()
+	# 		bn = BarndorffNielsen(stock)
+	#		bn.barndorff_nielsen_test()
 
 	def __init__(self,stock):
 		super(BarndorffNielsen,self).__init__(stock)
@@ -51,7 +63,8 @@ class BarndorffNielsen(JumpStatistics):
 		log_returns = np.absolute(self.stock.statistics["log_returns"])
 		mu = np.power(np.power(2.0,2.0 / 3) * gamma(7.0 / 6.0) * np.power(gamma(1.0 / 2.0),-1),-3)
 
-		tripower = np.sum(np.power(log_returns[2:],4.0 / 3) * np.power(log_returns[1:-1],4.0 / 3) * np.power(log_returns[:-2],4.0 / 3))
+		tripower = np.sum(np.power(log_returns[2:],4.0 / 3) * 
+			np.power(log_returns[1:-1],4.0 / 3) * np.power(log_returns[:-2],4.0 / 3))
 		quarticity = n * mu * (np.float(n) / (n - 2.0)) * tripower
 		return quarticity
 
@@ -66,8 +79,25 @@ class BarndorffNielsen(JumpStatistics):
 
 		return statistic
 
-stock = Stock("MSFT")
-stock.display_price()
+	def barndorff_nielsen_test(self,alpha = .01):
+		quantile = stats.norm.ppf(alpha)
+		print_string = ""
+		if self.statistic > quantile:
+			print_string += "\tThe Barndorff-Nielsen Test reports that there was a jump in asset price.\n"
+		else:
+			print_string += "\tThe Barndorff-Nielsen Test reports that there was not a jump in asset price.\n"
 
+		print_string += "\tThe significance level of the test: %.2f\n" % alpha
+		print self.stock
+		print print_string
+
+
+if True:
+	# Observe a trend in Microsoft stock prices where a jump occurs.
+	stock = Stock("MSFT",{"start" : "2013-02-14","end" : "2014-02-14"})
+else:
+	# Otherwise, view a sequence of stock prices where no jump was detected.
+	stock = Stock("MSFT",{"start" : "2013-03-01","end" : "2013-04-01"})
+stock.display_price()
 bn = BarndorffNielsen(stock)
-print "The Barndorff-Nielsen statistic: %.2f\n" % bn.statistic
+bn.barndorff_nielsen_test()

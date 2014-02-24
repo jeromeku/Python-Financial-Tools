@@ -141,8 +141,14 @@ class Portfolio(object):
         portfolio_weights = [solvers.qp(mu*S,-expected_returns,G,h,A,b)["x"] for mu in mu_array]
         returns = [dot(expected_returns,w) for w in portfolio_weights]
         risk = [np.sqrt(dot(w,S*w)) for w in portfolio_weights]
-
-        mu_free = self.risk_free.statistics["returns"][-1]
+        
+        # Calculate the portfolio with the greatest "reward-to-risk" ratio, which
+        # is Sharpe's ratio. Notice that it is not necessary to specify the risk
+        # free rate in the calculation of Sharpe's ratio, as without loss of generality
+        # it may be assumed to be zero. In either case, the same portfolio will
+        # achieve the maximum. However, since the risk free asset defaults to a 
+        # Treasury bill, we take no action regarding this observation.
+        mu_free = self.risk_free.statistics["expected_return"]
         sharpe_ratio = (returns - mu_free) / risk
         max_sharpe_index = sharpe_ratio == max(sharpe_ratio)
         min_variance_index = risk == min(risk)
