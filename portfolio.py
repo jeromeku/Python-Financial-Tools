@@ -14,6 +14,11 @@ from cvxopt.blas import dot
 from cvxopt import solvers
 from scipy import stats
 
+from pprint import pprint
+
+solvers.options["show_progress"] = False
+
+
 class Portfolio(object):
     def __init__(self,assets,risk_free = None,position = None):
         # The position refers to the dollar amount invested into this particular
@@ -59,7 +64,7 @@ class Portfolio(object):
         for i in range(self.n):
             returns[:,i] = self.assets[i].statistics["returns"]
 
-        statistics["mean"] = np.array([asset.statistics["expected_return"] for asset in self.assets])
+        statistics["expected_asset_returns"] = np.array([asset.statistics["expected_return"] for asset in self.assets])
         statistics["covariance"] = np.cov(returns,rowvar = 0)
 
         # Due to the behavior of the numpy "diag" function, scalar inputs will fail and 
@@ -80,7 +85,7 @@ class Portfolio(object):
             print "Either specify a position for the portfolio object or provide one as an input parameter."
             return np.nan
 
-        mu = self.statistics["mean"]
+        mu = self.statistics["expected_asset_returns"]
         S = self.statistics["covariance"]
         w = self.optimization["max_sharpe_weights"]
         portfolio_mu = np.dot(mu,w)
@@ -107,11 +112,11 @@ class Portfolio(object):
         kelly_optimization = {}
 
         n = self.n
-        r = self.risk_free.statistics["expected_return"]
+        r = self.risk_free.statistics["expected_daily_return"]
         S = matrix(1.0 / ((1 + r) ** 2) * self.statistics["covariance"])
-        r_assets = matrix(self.statistics["mean"])
+        r_assets = matrix([asset.statistics["expected_daily_return"] for asset in self.assets])
 
-        q = matrix(1.0 / (1 + r)) * (r_assets - r)
+        q = matrix(1.0 / (1 + r) * (r_assets - r))
 
         # This code is exactly reproduced from the routine for optimizing the portfolio
         # according to the maximum Sharpe's ratio and minimum variance criteria. As a 
@@ -121,10 +126,13 @@ class Portfolio(object):
         h = matrix(0.0, (n,1))
         A = matrix(1.0, (1,n))
         b = matrix(1.0)
-
-        portfolio_weights = solvers.qp(S,q,G,h,A,b)["x"]
-    
-        kelly_optimization["weights"] = portfolio_weights
+        
+        # Notice that the "linear" term in the quadratic optimization formulation is made 
+        # negative. This is because Nekrasov maximizes the function, whereas CXVOPT is forced
+        # to minimize. By making the linear term negative, we arrive at an equivalent 
+        # formulation.
+        portfolio_weights = solvers.qp(S,-q,G,h,A,b)["x"]
+        kelly_optimization["weights"] = np.array([portfolio_weights[i] for i in range(n)])
         return kelly_optimization
 
 
@@ -133,7 +141,7 @@ class Portfolio(object):
 
         n = self.n
         S = matrix(2 * self.statistics["covariance"])
-        pbar = matrix(self.statistics["mean"])
+        pbar = matrix(self.statistics["expected_asset_returns"])
         G = matrix(0.0, (n,n))
         G[::n+1] = -1.0
         h = matrix(0.0, (n,1))
@@ -141,8 +149,6 @@ class Portfolio(object):
         b = matrix(1.0)
 
         mu_array = [10**(5.0*t/100-1.0) for t in range(100)]
-
-        solvers.options["show_progress"] = False
 
         portfolio_weights = [solvers.qp(mu*S,-pbar,G,h,A,b)["x"] for mu in mu_array]
         returns = [dot(pbar,w) for w in portfolio_weights]
@@ -176,5 +182,5 @@ class Portfolio(object):
 portfolio = Portfolio(["MSFT","GOOG","IBM"])
 print portfolio
 
-portfolio.optimize_kelly_criterion()
+pprint(portfolio.optimize_kelly_criterion())
 
