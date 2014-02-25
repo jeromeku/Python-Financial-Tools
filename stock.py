@@ -124,11 +124,15 @@ class Stock(object):
         value_at_risk = -position * (tloc + quantile * tscale)
         return value_at_risk
 
+    def asset_closing_prices(self,array = False):
+        sorted_dates = sorted(self.profile.keys())
+        closing_prices = [np.float(self.profile[day]["Close"]) for day in sorted_dates]
+        return np.array(closing_prices) if array else closing_prices
 
     def display_price(self):
         sorted_dates = sorted(self.profile.keys())
         plt.plot_date([mdates.strpdate2num('%Y-%m-%d')(day) for day in sorted_dates],
-                      [np.float(self.profile[day]["Close"]) for day in sorted_dates],
+                      self.asset_closing_prices(),
                       fmt="k-o")
         plt.title(self.ticker + " Closing Prices")
         plt.ylabel("Daily Prices")

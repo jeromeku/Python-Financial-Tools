@@ -80,7 +80,9 @@ class BarndorffNielsen(JumpStatistics):
 		return statistic
 
 	def barndorff_nielsen_test(self,alpha = .01):
-		quantile = stats.norm.ppf(alpha)
+
+		quantile = stats.norm.ppf(1 - alpha)
+
 		print_string = ""
 		if self.statistic > quantile:
 			print_string += "\tThe Barndorff-Nielsen Test reports that there was a jump in asset price.\n"
