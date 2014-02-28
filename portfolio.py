@@ -183,8 +183,3 @@ class Portfolio(object):
 
         return G, h, A, b
 
-portfolio = Portfolio(["MSFT","GOOG","IBM"])
-print portfolio
-
-pprint(portfolio.optimize_kelly_criterion())
-

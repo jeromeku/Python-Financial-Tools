@@ -1,6 +1,6 @@
 # Stock.py: A Python class representing a stock as downloaded from Yahoo
 #       Finance! A stock object is instantiated by specifying a ticker
-#       and, optionally, a start and end date in the format "yyyy/mm/dd".
+#       and, optionally, a start and end date in the format "YYYY/MM/DD".
 #
 # The stock object is completely specified by its ticker and a pair of
 # dates across which is aggregates financial data. The stock class then
